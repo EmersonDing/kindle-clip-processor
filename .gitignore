@@ -1,5 +1,5 @@
 # Output
-resource/output.txt
+resource/*
 .idea/*
 
 # Byte-compiled / optimized / DLL files
