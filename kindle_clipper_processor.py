@@ -58,6 +58,13 @@ def print_chunk_dict(chunk_dict):
             print(line, '\n')
         print('\n')
 
+def print_titles(chunk_dict):
+    print("*"*10)
+    print("Title:")
+    for chunk in chunk_dict:
+        print(chunk)
+    print("*"*10)
+
 def output_file(chunk_dict):
     f = open(output_path, 'w')
     for chunk in chunk_dict:
@@ -73,6 +80,7 @@ if __name__ == '__main__':
     chunks = shaping_chunks(chunks)
     test_chunks(chunks)
     chunk_dict = classify_chunks(chunks)
+    print_titles(chunk_dict)
     print_chunk_dict(chunk_dict)
     output_file(chunk_dict)
 
