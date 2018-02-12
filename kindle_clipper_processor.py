@@ -67,11 +67,20 @@ def print_titles(chunk_dict):
 
 def output_file(chunk_dict):
     f = open(output_path, 'w')
+
+    f.write("Titles \n")
+    for chunk in chunk_dict:
+        f.write(chunk + '\n')
+    f.write("{} \n\n".format("="*10))
+
+    f.write("Novels \n")
     for chunk in chunk_dict:
         f.write(chunk + '\n')
         for line in chunk_dict[chunk]:
             f.write(line + '\n\n')
         f.write('\n\n')
+
+    f.close()
 
 if __name__ == '__main__':
     f = get_file()
