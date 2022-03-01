@@ -3,12 +3,13 @@
 
 input_path = 'resource/clip.txt'
 output_path = 'resource/output.txt'
-chunk_seperator = '=========='
+chunk_delimiter = '=========='
 
 
 def get_file():
     f = open(input_path, 'r')
     return f
+
 
 def get_file_string(f):
     s = ''
@@ -16,14 +17,23 @@ def get_file_string(f):
         s += line
     return s
 
-def get_chunk(s):
-    chunks = s.split(chunk_seperator)
-    return chunks
 
-def shaping_chunks(chunks):
+def get_raw_chunk(s):
     """
-    filter empty lines
-    shaping string to list
+    Chunk is combined with title | metadata | paragraph, e.g.:
+    ```
+        舞!舞!舞!
+        - 您在位置 #133-134的标注 | 添加于 2015年9月24日星期四 上午5:08:43
+        我这人决没有什么不正常。 我的确如此认为。
+    ```
+    """
+    return s.split(chunk_delimiter)
+
+
+def normalize_chunks(chunks):
+    """
+    filter empty lines.
+    transform string to list.
     """
     new_chunks = []
     for chunk in chunks:
@@ -32,16 +42,19 @@ def shaping_chunks(chunks):
         new_chunks.append(new_chunk)
     return new_chunks
 
+
 def classify_chunks(chunks):
     dict = {}
     for chunk in chunks:
         if len(chunk) <= 2:
             continue
-        chunk[0] = chunk[0].replace('(bingshuishenshi@126.com)', '')
-        if dict.get(chunk[0]) == None:
-            dict[chunk[0]] = []
-        dict[chunk[0]].append(chunk[2])
+        # Some clips have email addr in title, e.g. "title (email)"
+        title = chunk[0].replace('(bingshuishenshi@126.com)', '')
+        if dict.get(title) is None:
+            dict[title] = []
+        dict[title].append(chunk[2])
     return dict
+
 
 def test_chunks(chunks):
     for chunk in chunks:
@@ -49,6 +62,7 @@ def test_chunks(chunks):
             print('chunk size test fail')
             return
     print('chunk size test success')
+
 
 def print_chunk_dict(chunk_dict):
     for chunk in chunk_dict:
@@ -58,12 +72,14 @@ def print_chunk_dict(chunk_dict):
             print(line, '\n')
         print('\n')
 
+
 def print_titles(chunk_dict):
-    print("*"*10)
+    print("*" * 10)
     print("Title:")
     for chunk in chunk_dict:
         print(chunk)
-    print("*"*10)
+    print("*" * 10)
+
 
 def output_file(chunk_dict):
     f = open(output_path, 'w')
@@ -71,7 +87,7 @@ def output_file(chunk_dict):
     f.write("Titles \n")
     for chunk in chunk_dict:
         f.write(chunk + '\n')
-    f.write("{} \n\n".format("="*10))
+    f.write("{} \n\n".format("=" * 10))
 
     f.write("Novels \n")
     for chunk in chunk_dict:
@@ -82,14 +98,14 @@ def output_file(chunk_dict):
 
     f.close()
 
+
 if __name__ == '__main__':
     f = get_file()
     s = get_file_string(f)
-    chunks = get_chunk(s)
-    chunks = shaping_chunks(chunks)
-    test_chunks(chunks)
-    chunk_dict = classify_chunks(chunks)
+    raw_chunks = get_raw_chunk(s)
+    normalized_chunks = normalize_chunks(raw_chunks)
+    test_chunks(normalized_chunks)
+    chunk_dict = classify_chunks(normalized_chunks)
     print_titles(chunk_dict)
     print_chunk_dict(chunk_dict)
     output_file(chunk_dict)
-
