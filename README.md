@@ -2,4 +2,6 @@
 need to run with python3
 
 # TODO
-Add date filtering feature. Use input timeststamp, and only shows the notes after that time.
+[] Add date filtering flag  
+[] Add book title filtering flat
+[] Choose to print raw log or organized logs group by book   
