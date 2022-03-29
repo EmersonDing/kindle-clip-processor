@@ -32,7 +32,7 @@ class TestKindleClipperProcessor(TestCase):
         expected = ['test', 'test2']
         assert expected == main.strip_empty_strings(test_strings)
 
-    def test_chunk(self):
+    def test_chunk_constructor(self):
         raw_chunks = main.get_raw_chunks(self.sample_chunks)
         chunks = main.get_chunks(raw_chunks)
 

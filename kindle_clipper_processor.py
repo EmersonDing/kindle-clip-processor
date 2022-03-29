@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import datetime
 import re
+import argparse
 
 input_path = 'resource/clip.txt'
 output_path = 'resource/output.txt'
@@ -145,12 +146,38 @@ def strip_empty_strings(strings):
     return non_empty_strings
 
 
+def fetch_date_filtering_option():
+    parser = argparse.ArgumentParser(description='Input date')
+    parser.add_argument('--date', '-d', required=False,
+                        help='filter clip after the input date')
+    args = parser.parse_args()
+    filter_date = None
+    if args.date is not None:
+        filter_date = datetime.datetime.strptime(str(args.date), '%Y-%m-%d').date()
+    print('Filtering notes after: {}'.format(filter_date))
+    return filter_date
+
+
+def filter_chunks_by_date(chunks, filter_date):
+    if filter_date is None:
+        return chunks
+    filtered_chunks = []
+    for chunk in chunks:
+        if chunk.date >= filter_date:
+            filtered_chunks.append(chunk)
+    return filtered_chunks
+    # return list(map(lambda c: c.date >= filter_date, chunks))
+
+
 if __name__ == '__main__':
+    filter_date = fetch_date_filtering_option()
+
     f = get_file()
     s = get_file_string(f)
     raw_chunks = get_raw_chunks(s)
     chunks = get_chunks(raw_chunks)
-    chunk_dict = classify_chunks(chunks)
+    filtered_chunks = filter_chunks_by_date(chunks, filter_date)
+    chunk_dict = classify_chunks(filtered_chunks)
     print_titles(chunk_dict)
     print_chunk_dict(chunk_dict)
     output_file(chunk_dict)
