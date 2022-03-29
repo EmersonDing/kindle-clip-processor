@@ -6,6 +6,7 @@ import re
 input_path = 'resource/clip.txt'
 output_path = 'resource/output.txt'
 chunk_delimiter = '=========='
+context_setting = dict(help_option_names=['-h', '--help'])
 
 
 class Chunk:
@@ -27,17 +28,12 @@ class Chunk:
         * transform string to list.
         """
         lines = raw_chunk.split('\n')
-        chunk = list(filter(lambda line: line != '', lines))
+        chunk = strip_empty_strings(lines)
         # Some clips have email addr in title, e.g. "title (email)"
         title = chunk[0].replace('(bingshuishenshi@126.com)', '')
         metadata = chunk[1]
-        text = '\n'.join(chunk[2:])
-
-        # for i in range(0, len(chunk)):
-        #     print('line {0}: <{1}>'.format(i, chunk[i]))
-        #
-        # self.metadata = metadata
-        # print(self.extract_date())
+        # some note has title and metadata, but empty text body
+        text = '\n'.join(chunk[2:]) if len(chunk) >= 2 else ''
 
         return title, metadata, text
 
@@ -64,16 +60,12 @@ def get_file_string(f):
 
 
 def get_raw_chunks(s):
-    """
-    Chunk is combined with title | metadata | paragraph, e.g.:
-    ```
-        舞!舞!舞!
-        - 您在位置 #133-134的标注 | 添加于 2015年9月24日星期四 上午5:08:43
-        我这人决没有什么不正常。 我的确如此认为。
-    ```
-    """
     raw_chunks = s.split(chunk_delimiter)
     return strip_empty_strings(raw_chunks)
+
+
+def get_chunks(raw_chunks):
+    return list(map(lambda c: Chunk(c), raw_chunks))
 
 
 def normalize_chunks(chunks):
@@ -109,12 +101,11 @@ def test_chunks(chunks):
 
 
 def print_chunk_dict(chunk_dict):
-    for chunk in chunk_dict:
+    for title in chunk_dict:
         print('**********')
-        print(chunk)
-        for line in chunk_dict[chunk]:
+        print(title, '\n')
+        for line in chunk_dict[title]:
             print(line, '\n')
-        print('\n')
 
 
 def print_titles(chunk_dict):
@@ -144,14 +135,21 @@ def output_file(chunk_dict):
 
 
 def strip_empty_strings(strings):
-    return list(filter(lambda s: s != '' and s != '\n', strings))
+    non_empty_strings = []
+    for s in strings:
+        # will remove space and \n
+        s = s.strip()
+        if s != '':
+            non_empty_strings.append(s)
+
+    return non_empty_strings
 
 
 if __name__ == '__main__':
     f = get_file()
     s = get_file_string(f)
     raw_chunks = get_raw_chunks(s)
-    chunks = list(map(lambda c: Chunk(c), raw_chunks))
+    chunks = get_chunks(raw_chunks)
     chunk_dict = classify_chunks(chunks)
     print_titles(chunk_dict)
     print_chunk_dict(chunk_dict)
